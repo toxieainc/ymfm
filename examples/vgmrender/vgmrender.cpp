@@ -329,7 +329,7 @@ void add_chips(uint32_t clock, chip_type type, char const *chipname)
 	{
 		char name[100];
 		sprintf(name, "%s #%d", chipname, index);
-		active_chips.push_back(new vgm_chip<ChipType>(clockval, type, chipname));
+		active_chips.push_back(new vgm_chip<ChipType>(clockval, type, (numchips == 2) ? name : chipname));
 	}
 
 	if (type == CHIP_YM2608)
@@ -1117,6 +1117,13 @@ int write_wav(char const *filename, uint32_t output_rate, std::vector<int32_t> &
 	{
 		int32_t absval = std::abs(wav_buffer_src[index]);
 		max_scale = std::max(max_scale, absval);
+	}
+
+	// warn if only silence was detected (and also avoid divide by zero)
+	if (max_scale == 0)
+	{
+		fprintf(stderr, "The WAV file data will only contain silence.\n");
+		max_scale = 1;
 	}
 
 	// now convert
